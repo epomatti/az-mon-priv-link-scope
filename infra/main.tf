@@ -100,10 +100,10 @@ resource "azurerm_linux_web_app" "default" {
 
   site_config {
     always_on         = true
-    health_check_path = "/"
+    health_check_path = "/actuator/health"
 
     application_stack {
-      docker_image_name        = "${azurerm_container_registry.acr.name}.azurecr.io/javaapp:latest"
+      docker_image_name        = "javaapp:latest"
       docker_registry_url      = "https://${azurerm_container_registry.acr.login_server}"
       docker_registry_username = azurerm_container_registry.acr.admin_username
       docker_registry_password = azurerm_container_registry.acr.admin_password
@@ -117,10 +117,10 @@ resource "azurerm_linux_web_app" "default" {
   }
 }
 
-resource "azurerm_app_service_virtual_network_swift_connection" "default" {
-  app_service_id = azurerm_linux_web_app.default.id
-  subnet_id      = azurerm_subnet.app.id
-}
+# resource "azurerm_app_service_virtual_network_swift_connection" "default" {
+#   app_service_id = azurerm_linux_web_app.default.id
+#   subnet_id      = azurerm_subnet.app.id
+# }
 
 resource "azurerm_monitor_diagnostic_setting" "plan" {
   name                       = "Plan Diagnostics"
