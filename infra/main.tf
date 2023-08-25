@@ -47,12 +47,38 @@ resource "azurerm_subnet" "app" {
   }
 }
 
+resource "azurerm_subnet" "ampls" {
+  name                 = "ampls-subnet"
+  resource_group_name  = azurerm_resource_group.default.name
+  virtual_network_name = azurerm_virtual_network.default.name
+  address_prefixes     = ["10.0.55.0/24"]
+}
+
+# resource "azurerm_subnet" "vm" {
+#   name                 = "vm-subnet"
+#   resource_group_name  = azurerm_resource_group.default.name
+#   virtual_network_name = azurerm_virtual_network.default.name
+#   address_prefixes     = ["10.0.99.0/24"]
+# }
+
 resource "azurerm_log_analytics_workspace" "default" {
   name                = "log-${local.affix}"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
+}
+
+resource "azurerm_application_insights" "default" {
+  name                = "appi-${local.affix}"
+  location            = azurerm_resource_group.default.location
+  resource_group_name = azurerm_resource_group.default.name
+  workspace_id        = azurerm_log_analytics_workspace.default.id
+  application_type    = "other"
+
+  // This controls ingestion & query
+  internet_ingestion_enabled = var.appi_internet_ingestion_enabled
+  internet_query_enabled     = true
 }
 
 resource "azurerm_monitor_private_link_scope" "default" {
@@ -65,14 +91,6 @@ resource "azurerm_monitor_private_link_scoped_service" "default" {
   resource_group_name = azurerm_resource_group.default.name
   scope_name          = azurerm_monitor_private_link_scope.default.name
   linked_resource_id  = azurerm_application_insights.default.id
-}
-
-resource "azurerm_application_insights" "default" {
-  name                = "appi-${local.affix}"
-  location            = azurerm_resource_group.default.location
-  resource_group_name = azurerm_resource_group.default.name
-  workspace_id        = azurerm_log_analytics_workspace.default.id
-  application_type    = "other"
 }
 
 resource "azurerm_service_plan" "default" {
@@ -102,6 +120,8 @@ resource "azurerm_linux_web_app" "default" {
     always_on         = true
     health_check_path = "/actuator/health"
 
+    vnet_route_all_enabled = var.appservice_vnet_route_all_enabled
+
     application_stack {
       docker_image_name        = "javaapp:latest"
       docker_registry_url      = "https://${azurerm_container_registry.acr.login_server}"
@@ -125,6 +145,132 @@ resource "azurerm_app_service_virtual_network_swift_connection" "default" {
   app_service_id = azurerm_linux_web_app.default.id
   subnet_id      = azurerm_subnet.app.id
 }
+
+resource "azurerm_private_dns_zone" "monitor" {
+  name                = "privatelink.monitor.azure.com"
+  resource_group_name = azurerm_resource_group.default.name
+}
+
+resource "azurerm_private_dns_zone" "oms" {
+  name                = "privatelink.oms.opinsights.azure.com"
+  resource_group_name = azurerm_resource_group.default.name
+}
+
+resource "azurerm_private_dns_zone" "ods" {
+  name                = "privatelink.ods.opinsights.azure.com"
+  resource_group_name = azurerm_resource_group.default.name
+}
+
+resource "azurerm_private_dns_zone" "agentsvc" {
+  name                = "privatelink.agentsvc.azure-automation.net"
+  resource_group_name = azurerm_resource_group.default.name
+}
+
+resource "azurerm_private_dns_zone" "blob" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = azurerm_resource_group.default.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "monitor" {
+  name                  = "ampls-monitor-link"
+  resource_group_name   = azurerm_resource_group.default.name
+  private_dns_zone_name = azurerm_private_dns_zone.monitor.name
+  virtual_network_id    = azurerm_virtual_network.default.id
+  registration_enabled  = false
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "oms" {
+  name                  = "ampls-oms-link"
+  resource_group_name   = azurerm_resource_group.default.name
+  private_dns_zone_name = azurerm_private_dns_zone.oms.name
+  virtual_network_id    = azurerm_virtual_network.default.id
+  registration_enabled  = false
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "ods" {
+  name                  = "ampls-ods-link"
+  resource_group_name   = azurerm_resource_group.default.name
+  private_dns_zone_name = azurerm_private_dns_zone.ods.name
+  virtual_network_id    = azurerm_virtual_network.default.id
+  registration_enabled  = false
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "agentsvc" {
+  name                  = "ampls-agentsvc-link"
+  resource_group_name   = azurerm_resource_group.default.name
+  private_dns_zone_name = azurerm_private_dns_zone.agentsvc.name
+  virtual_network_id    = azurerm_virtual_network.default.id
+  registration_enabled  = false
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "blob" {
+  name                  = "ampls-blob-link"
+  resource_group_name   = azurerm_resource_group.default.name
+  private_dns_zone_name = azurerm_private_dns_zone.blob.name
+  virtual_network_id    = azurerm_virtual_network.default.id
+  registration_enabled  = false
+}
+
+
+resource "azurerm_private_endpoint" "ampls" {
+  name                = "peampls-${local.affix}"
+  location            = azurerm_resource_group.default.location
+  resource_group_name = azurerm_resource_group.default.name
+  subnet_id           = azurerm_subnet.ampls.id
+
+  private_dns_zone_group {
+    name = "ampls-group"
+    private_dns_zone_ids = [
+      azurerm_private_dns_zone.monitor.id,
+      azurerm_private_dns_zone.oms.id,
+      azurerm_private_dns_zone.ods.id,
+      azurerm_private_dns_zone.agentsvc.id,
+      azurerm_private_dns_zone.blob.id,
+    ]
+  }
+
+  private_service_connection {
+    name                           = "ampls"
+    private_connection_resource_id = azurerm_monitor_private_link_scope.default.id
+    is_manual_connection           = false
+    subresource_names              = ["azuremonitor"]
+  }
+}
+
+# resource "azurerm_private_dns_zone" "azurewebsites" {
+#   name                = "privatelink.azurewebsites.net"
+#   resource_group_name = azurerm_resource_group.default.name
+# }
+
+# resource "azurerm_private_dns_zone_virtual_network_link" "azurewebsites" {
+#   name                  = "azurewebsites-link"
+#   resource_group_name   = azurerm_resource_group.default.name
+#   private_dns_zone_name = azurerm_private_dns_zone.azurewebsites.name
+#   virtual_network_id    = azurerm_virtual_network.default.id
+#   registration_enabled  = true
+# }
+
+
+# resource "azurerm_private_endpoint" "app" {
+#   name                = "pe-${local.affix}"
+#   location            = azurerm_resource_group.default.location
+#   resource_group_name = azurerm_resource_group.default.name
+#   subnet_id           = azurerm_subnet.app.id
+
+#   private_dns_zone_group {
+#     name = azurerm_private_dns_zone.azurewebsites.name
+#     private_dns_zone_ids = [
+#       azurerm_private_dns_zone.azurewebsites.id
+#     ]
+#   }
+
+#   private_service_connection {
+#     name                           = "azurewebsites"
+#     private_connection_resource_id = azurerm_linux_web_app.default.id
+#     is_manual_connection           = false
+#     subresource_names              = ["sites"]
+#   }
+# }
 
 resource "azurerm_monitor_diagnostic_setting" "plan" {
   name                       = "Plan Diagnostics"
@@ -171,3 +317,61 @@ resource "azurerm_monitor_diagnostic_setting" "app" {
     enabled  = true
   }
 }
+
+# resource "azurerm_public_ip" "main" {
+#   name                = "pip-${local.affix}"
+#   location            = azurerm_resource_group.default.location
+#   resource_group_name = azurerm_resource_group.default.name
+#   allocation_method   = "Static"
+# }
+
+# resource "azurerm_network_interface" "main" {
+#   name                = "nic-${local.affix}"
+#   location            = azurerm_resource_group.default.location
+#   resource_group_name = azurerm_resource_group.default.name
+
+#   ip_configuration {
+#     name                          = "default"
+#     subnet_id                     = azurerm_subnet.vm.id
+#     private_ip_address_allocation = "Dynamic"
+#     public_ip_address_id          = azurerm_public_ip.main.id
+#   }
+
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }
+
+# resource "azurerm_linux_virtual_machine" "main" {
+#   name                  = "vm-${local.affix}"
+#   location              = azurerm_resource_group.default.location
+#   resource_group_name   = azurerm_resource_group.default.name
+#   size                  = "Standard_B1s"
+#   admin_username        = "vmadmin"
+#   admin_password        = "P@ssw0rd.123"
+#   network_interface_ids = [azurerm_network_interface.main.id]
+
+#   admin_ssh_key {
+#     username   = "vmadmin"
+#     public_key = file("~/.ssh/id_rsa.pub")
+#   }
+
+#   os_disk {
+#     name                 = "osdisk-${local.affix}"
+#     caching              = "ReadWrite"
+#     storage_account_type = "StandardSSD_LRS"
+#   }
+
+#   source_image_reference {
+#     publisher = "Canonical"
+#     offer     = "0001-com-ubuntu-server-jammy"
+#     sku       = "22_04-lts-gen2"
+#     version   = "latest"
+#   }
+
+#   lifecycle {
+#     ignore_changes = [
+#       custom_data
+#     ]
+#   }
+# }

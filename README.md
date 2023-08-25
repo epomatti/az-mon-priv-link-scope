@@ -2,6 +2,8 @@
 
 Logging and instrumentation with network isolation.
 
+Does not support VNET integration.
+
 ## Local development
 
 ```sh
