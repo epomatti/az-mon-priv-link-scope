@@ -2,6 +2,10 @@
 
 Logging and instrumentation with Monitor services network isolation using Private Link.
 
+This service connection allow an application to send logs, telemetry, and other data, to Azure Monitor via a private connection.
+
+It is possible to control `send data` and `query` public connectivity separately.
+
 <img src=".assets/ampls.png" />
 
 ## Running on the cloud
