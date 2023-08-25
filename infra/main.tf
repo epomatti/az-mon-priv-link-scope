@@ -39,10 +39,10 @@ resource "azurerm_subnet" "app" {
   delegation {
     name = "delegation"
     service_delegation {
+      name = "Microsoft.Web/serverFarms"
       actions = [
         "Microsoft.Network/virtualNetworks/subnets/action",
       ]
-      name = "Microsoft.Web/serverFarms"
     }
   }
 }
@@ -115,12 +115,16 @@ resource "azurerm_linux_web_app" "default" {
     DOCKER_ENABLE_CI                      = true
     WEBSITES_PORT                         = 8080
   }
+
+  lifecycle {
+    ignore_changes = [virtual_network_subnet_id]
+  }
 }
 
-# resource "azurerm_app_service_virtual_network_swift_connection" "default" {
-#   app_service_id = azurerm_linux_web_app.default.id
-#   subnet_id      = azurerm_subnet.app.id
-# }
+resource "azurerm_app_service_virtual_network_swift_connection" "default" {
+  app_service_id = azurerm_linux_web_app.default.id
+  subnet_id      = azurerm_subnet.app.id
+}
 
 resource "azurerm_monitor_diagnostic_setting" "plan" {
   name                       = "Plan Diagnostics"
