@@ -140,60 +140,30 @@ resource "azurerm_monitor_diagnostic_setting" "app" {
 
   enabled_log {
     category = "AppServiceHTTPLogs"
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
 
   enabled_log {
     category = "AppServiceConsoleLogs"
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
 
   enabled_log {
     category = "AppServiceAppLogs"
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
 
   enabled_log {
     category = "AppServiceAuditLogs"
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
 
   enabled_log {
     category = "AppServiceIPSecAuditLogs"
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
 
   enabled_log {
     category = "AppServicePlatformLogs"
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
-
 
   metric {
     category = "AllMetrics"
     enabled  = true
-
-    retention_policy {
-      days    = 7
-      enabled = true
-    }
   }
 }
