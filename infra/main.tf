@@ -56,7 +56,6 @@ resource "azurerm_subnet" "ampls" {
   address_prefixes     = ["10.0.55.0/24"]
 }
 
-
 ### Monitor ###
 
 resource "azurerm_log_analytics_workspace" "default" {
