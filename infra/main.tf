@@ -1,15 +1,31 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+}
+
 locals {
   affix = "epicservicex"
 }
 
 resource "azurerm_resource_group" "default" {
   name     = "rg-${local.affix}"
-  location = var.location
+  location = "brazilsouth"
 }
 
 resource "azurerm_virtual_network" "default" {
   name                = "vnet-${local.affix}"
-  location            = "brazilsouth"
+  location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   address_space       = ["10.0.0.0/16"]
 }
@@ -87,15 +103,16 @@ resource "azurerm_linux_web_app" "default" {
     health_check_path = "/"
 
     application_stack {
-      docker_image     = var.docker_image
-      docker_image_tag = "latest"
+      docker_image_name        = "${azurerm_container_registry.acr.name}.azurecr.io/javaapp:latest"
+      docker_registry_url      = azurerm_container_registry.acr.login_server
+      docker_registry_username = azurerm_container_registry.acr.admin_username
+      docker_registry_password = azurerm_container_registry.acr.admin_password
     }
   }
 
   app_settings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.default.connection_string
     DOCKER_ENABLE_CI                      = true
-    DOCKER_REGISTRY_SERVER_URL            = "https://index.docker.io"
     WEBSITES_PORT                         = 8080
   }
 }
@@ -125,65 +142,54 @@ resource "azurerm_monitor_diagnostic_setting" "app" {
   target_resource_id         = azurerm_linux_web_app.default.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.default.id
 
-  log {
+  enabled_log {
     category = "AppServiceHTTPLogs"
-    enabled  = true
-
     retention_policy {
       days    = 7
       enabled = true
     }
   }
 
-  log {
+  enabled_log {
     category = "AppServiceConsoleLogs"
-    enabled  = true
-
     retention_policy {
       days    = 7
       enabled = true
     }
   }
 
-  log {
+  enabled_log {
     category = "AppServiceAppLogs"
-    enabled  = true
-
     retention_policy {
       days    = 7
       enabled = true
     }
   }
 
-  log {
+  enabled_log {
     category = "AppServiceAuditLogs"
-    enabled  = true
-
     retention_policy {
       days    = 7
       enabled = true
     }
   }
 
-  log {
+  enabled_log {
     category = "AppServiceIPSecAuditLogs"
-    enabled  = true
-
     retention_policy {
       days    = 7
       enabled = true
     }
   }
 
-  log {
+  enabled_log {
     category = "AppServicePlatformLogs"
-    enabled  = true
-
     retention_policy {
       days    = 7
       enabled = true
     }
   }
+
 
   metric {
     category = "AllMetrics"
