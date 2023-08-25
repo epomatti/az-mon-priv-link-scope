@@ -1,3 +1,8 @@
+variable "log_analytics_workspace_internet_ingestion_enabled" {
+  type    = bool
+  default = false
+}
+
 variable "appi_internet_ingestion_enabled" {
   type    = bool
   default = false
