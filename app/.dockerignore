@@ -2,6 +2,8 @@
 *
 
 # Allow files and directories
+!/.mvn
 !/src
 !/Dockerfile
+!/mvnw
 !/pom.xml

@@ -11,7 +11,8 @@ RUN ./mvnw clean install
 RUN mkdir /opt/appi
 ARG agentVersion="3.4.17"
 RUN curl -L https://github.com/microsoft/ApplicationInsights-Java/releases/download/$agentVersion/applicationinsights-agent-$agentVersion.jar --output /opt/appi/appi-agent.jar
-COPY ./applicationinsights.json /opt/appi/
+# TODO: Configure instrumentation settings
+# COPY ./applicationinsights.json /opt/appi/
 
 
 ### Runtime ###
