@@ -27,41 +27,43 @@ Once AppSrv pulls and runs the container, call the application endpoint `/monito
 
 ## Local development
 
-To test the Java application locally, create the Monitor resources:
+Create the Azure Monitor resources for testing locally:
 
 ```sh
+# Upgrade Bicep
+az bicep upgrade
+
+# Create the resources
 az deployment sub create \
   --location brazilsouth \
   --template-file dev/main.bicep \
   --parameters rgLocation=brazilsouth
 ```
 
-Get the the APPI connection string:
+For local development, enter the `app` directory:
 
 ```sh
-az monitor app-insights component show --app 'appi-myjavaapp' -g 'rg-myjavaapp' --query 'connectionString' -o tsv
+cd app
 ```
 
-Set it as an environment variable:
+Configure and connect your local session to Azure Monitor:
 
 ```sh
-export APPLICATIONINSIGHTS_CONNECTION_STRING='<Your Connection String>'
+bash appiSetup.sh
 ```
 
-In the `app` directory, download the latest release of the agent: 
-
-```
-curl -L -o applicationinsights-agent-3.4.14.jar https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.4.14/applicationinsights-agent-3.4.14.jar
-```
-
-Setup the `MAVEN_OPTS` variable:
-
-```
-export MAVEN_OPTS=-javaagent:applicationinsights-agent-3.4.14.jar
-```
-
-Run the application:
+Start the application:
 
 ```sh
 ./mvnw spring-boot:run
+```
+
+Test the endpoint:
+
+```sh
+# Basic check
+curl localhost:8080/hello
+
+# Write to standard out and check Monitor
+curl localhost:8080/monitor
 ```
