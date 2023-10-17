@@ -87,4 +87,12 @@ resource "azurerm_private_endpoint" "ampls" {
     is_manual_connection           = false
     subresource_names              = ["azuremonitor"]
   }
+
+  depends_on = [
+    azurerm_private_dns_zone_virtual_network_link.agentsvc,
+    azurerm_private_dns_zone_virtual_network_link.blob,
+    azurerm_private_dns_zone_virtual_network_link.monitor,
+    azurerm_private_dns_zone_virtual_network_link.ods,
+    azurerm_private_dns_zone_virtual_network_link.oms
+  ]
 }
