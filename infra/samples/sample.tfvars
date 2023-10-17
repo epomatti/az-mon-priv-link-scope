@@ -1,5 +1,6 @@
 # Project
 workload = "examplefactory"
+location = "brazilsouth"
 
 # Log Analtyics Workspace
 logs_internet_ingestion_enabled = false

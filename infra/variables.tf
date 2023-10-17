@@ -3,6 +3,11 @@ variable "workload" {
   default = "examplefactory"
 }
 
+variable "location" {
+  type    = string
+  default = "brazilsouth"
+}
+
 variable "logs_internet_ingestion_enabled" {
   type    = bool
   default = false

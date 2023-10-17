@@ -9,7 +9,7 @@ terraform {
 
 resource "azurerm_resource_group" "default" {
   name     = "rg-${var.workload}"
-  location = "brazilsouth"
+  location = var.location
 }
 
 module "vnet" {
