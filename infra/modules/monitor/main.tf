@@ -6,8 +6,8 @@ resource "azurerm_log_analytics_workspace" "default" {
   sku                 = "PerGB2018"
   retention_in_days   = 30
 
-  internet_ingestion_enabled = var.log_analytics_workspace_internet_ingestion_enabled
-  internet_query_enabled     = true
+  internet_ingestion_enabled = var.logs_internet_ingestion_enabled
+  internet_query_enabled     = var.logs_internet_query_enabled
 }
 
 resource "azurerm_application_insights" "default" {
@@ -18,7 +18,7 @@ resource "azurerm_application_insights" "default" {
   application_type    = "other"
 
   internet_ingestion_enabled = var.appi_internet_ingestion_enabled
-  internet_query_enabled     = true
+  internet_query_enabled     = var.appi_internet_query_enabled
 }
 
 ### AMPLS ###

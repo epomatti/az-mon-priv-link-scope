@@ -25,8 +25,11 @@ module "monitor" {
   location = azurerm_resource_group.default.location
   group    = azurerm_resource_group.default.name
 
-  log_analytics_workspace_internet_ingestion_enabled = var.log_analytics_workspace_internet_ingestion_enabled
-  appi_internet_ingestion_enabled                    = var.appi_internet_ingestion_enabled
+  logs_internet_ingestion_enabled = var.logs_internet_ingestion_enabled
+  logs_internet_query_enabled     = var.logs_internet_query_enabled
+
+  appi_internet_ingestion_enabled = var.appi_internet_ingestion_enabled
+  appi_internet_query_enabled     = var.appi_internet_query_enabled
 }
 
 module "privatelink" {
