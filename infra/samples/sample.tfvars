@@ -7,7 +7,7 @@ logs_internet_ingestion_enabled = false
 logs_internet_query_enabled     = true
 
 # Application Insights
-appi_internet_ingestion_enabled = true
+appi_internet_ingestion_enabled = false
 appi_internet_query_enabled     = true
 
 # Web App
