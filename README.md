@@ -49,7 +49,7 @@ cd app
 Configure and connect your local session to Azure Monitor:
 
 ```sh
-bash appiSetup.sh
+source appiSetup.sh
 ```
 
 Start the application:
