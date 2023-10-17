@@ -11,5 +11,5 @@ appi_internet_ingestion_enabled = false
 appi_internet_query_enabled     = true
 
 # Web App
-webapp_vnet_route_all_enabled = false
+webapp_vnet_route_all_enabled = true
 webapp_service_plan_sku_name  = "B1"

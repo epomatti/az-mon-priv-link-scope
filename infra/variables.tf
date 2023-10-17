@@ -30,7 +30,7 @@ variable "appi_internet_query_enabled" {
 
 variable "webapp_vnet_route_all_enabled" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "webapp_service_plan_sku_name" {
