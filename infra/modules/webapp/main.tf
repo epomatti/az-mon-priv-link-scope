@@ -11,7 +11,7 @@ resource "azurerm_service_plan" "default" {
   resource_group_name = var.group
   location            = var.location
   os_type             = "Linux"
-  sku_name            = "B1"
+  sku_name            = var.service_plan_sku_name
 }
 
 resource "azurerm_linux_web_app" "default" {
