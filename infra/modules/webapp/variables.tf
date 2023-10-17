@@ -10,6 +10,10 @@ variable "location" {
   type = string
 }
 
+variable "service_plan_sku_name" {
+  type = string
+}
+
 variable "app_subnet_id" {
   type = string
 }

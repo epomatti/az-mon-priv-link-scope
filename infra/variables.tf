@@ -27,3 +27,8 @@ variable "webapp_vnet_route_all_enabled" {
   type    = bool
   default = false
 }
+
+variable "webapp_service_plan_sku_name" {
+  type    = string
+  default = "B1"
+}

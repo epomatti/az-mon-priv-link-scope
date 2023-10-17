@@ -49,6 +49,7 @@ module "webapp" {
   location = azurerm_resource_group.default.location
   group    = azurerm_resource_group.default.name
 
+  service_plan_sku_name                  = var.webapp_service_plan_sku_name
   app_subnet_id                          = module.vnet.app_subnet_id
   log_analytics_workspace_id             = module.monitor.log_workspace_id
   application_insights_connection_string = module.monitor.appi_connection_string
