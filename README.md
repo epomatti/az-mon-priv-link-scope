@@ -12,9 +12,9 @@ It is possible to control `send data` and `query` public connectivity separately
 
 Create the resources:
 
-```
+```sh
 terraform init
-terraform apply
+terraform apply -auto-approve
 ```
 
 Run the script to build and push the docker image to ACR:
