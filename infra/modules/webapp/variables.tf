@@ -30,3 +30,16 @@ variable "application_insights_connection_string" {
   type      = string
   sensitive = true
 }
+
+variable "acr_login_server" {
+  type = string
+}
+
+variable "acr_admin_username" {
+  type = string
+}
+
+variable "acr_admin_password" {
+  type      = string
+  sensitive = true
+}

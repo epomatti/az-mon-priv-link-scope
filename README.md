@@ -10,11 +10,17 @@ It is possible to control `send data` and `query` public connectivity separately
 
 ## Running on the cloud
 
+Copy the `.auto.tfvars` template file:
+
+```sh
+cp infra/config/template.tfvars infra/.auto.tfvars
+```
+
 Create the resources:
 
 ```sh
-terraform init
-terraform apply -auto-approve
+terraform -chdir="infra" init
+terraform -chdir="infra" apply -auto-approve
 ```
 
 Run the script to build and push the docker image to ACR:

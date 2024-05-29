@@ -1,39 +1,35 @@
 variable "workload" {
-  type    = string
-  default = "examplefactory"
+  type = string
 }
 
 variable "location" {
-  type    = string
-  default = "brazilsouth"
+  type = string
 }
 
 variable "logs_internet_ingestion_enabled" {
-  type    = bool
-  default = false
+  type = bool
 }
 
 variable "logs_internet_query_enabled" {
-  type    = bool
-  default = true
+  type = bool
 }
 
 variable "appi_internet_ingestion_enabled" {
-  type    = bool
-  default = false
+  type = bool
 }
 
 variable "appi_internet_query_enabled" {
-  type    = bool
-  default = true
+  type = bool
 }
 
 variable "webapp_vnet_route_all_enabled" {
-  type    = bool
-  default = true
+  type = bool
 }
 
 variable "webapp_service_plan_sku_name" {
-  type    = string
-  default = "B1"
+  type = string
+}
+
+variable "acr_sku" {
+  type = string
 }

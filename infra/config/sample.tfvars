@@ -1,6 +1,6 @@
 # Project
-workload = "examplefactory"
-location = "brazilsouth"
+workload = "contoso"
+location = "eastus2"
 
 # Log Analtyics Workspace
 logs_internet_ingestion_enabled = false
@@ -11,5 +11,8 @@ appi_internet_ingestion_enabled = false
 appi_internet_query_enabled     = true
 
 # Web App
+webapp_service_plan_sku_name  = "P1v3"
 webapp_vnet_route_all_enabled = true
-webapp_service_plan_sku_name  = "B1"
+
+# Container Registry
+acr_sku = "Standard"

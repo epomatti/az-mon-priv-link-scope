@@ -7,21 +7,33 @@ terraform {
   }
 }
 
+resource "random_string" "workload" {
+  length  = 5
+  special = false
+  lower   = true
+}
+
+locals {
+  affix            = random_string.workload.result
+  workload         = "contoso-${local.affix}"
+  workload_no_dash = "contoso${local.affix}"
+}
+
 resource "azurerm_resource_group" "default" {
-  name     = "rg-${var.workload}"
+  name     = "rg-${local.workload}"
   location = var.location
 }
 
 module "vnet" {
   source   = "./modules/vnet"
-  workload = var.workload
+  workload = local.workload
   location = azurerm_resource_group.default.location
   group    = azurerm_resource_group.default.name
 }
 
 module "monitor" {
   source   = "./modules/monitor"
-  workload = var.workload
+  workload = local.workload
   location = azurerm_resource_group.default.location
   group    = azurerm_resource_group.default.name
 
@@ -34,7 +46,7 @@ module "monitor" {
 
 module "privatelink" {
   source   = "./modules/privatelink"
-  workload = var.workload
+  workload = local.workload
   location = azurerm_resource_group.default.location
   group    = azurerm_resource_group.default.name
 
@@ -43,9 +55,17 @@ module "privatelink" {
   monitor_private_link_scope_id = module.monitor.monitor_private_link_scope_id
 }
 
+module "acr" {
+  source           = "./modules/acr"
+  workload_no_dash = local.workload_no_dash
+  location         = azurerm_resource_group.default.location
+  group            = azurerm_resource_group.default.name
+  sku              = var.acr_sku
+}
+
 module "webapp" {
   source   = "./modules/webapp"
-  workload = var.workload
+  workload = local.workload
   location = azurerm_resource_group.default.location
   group    = azurerm_resource_group.default.name
 
@@ -55,4 +75,8 @@ module "webapp" {
   application_insights_connection_string = module.monitor.appi_connection_string
 
   web_app_vnet_route_all_enabled = var.webapp_vnet_route_all_enabled
+
+  acr_login_server   = module.acr.acr_login_server
+  acr_admin_username = module.acr.acr_admin_username
+  acr_admin_password = module.acr.acr_admin_password
 }

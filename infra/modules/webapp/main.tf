@@ -1,11 +1,3 @@
-resource "azurerm_container_registry" "acr" {
-  name                = "acr${var.workload}"
-  resource_group_name = var.group
-  location            = var.location
-  sku                 = "Basic"
-  admin_enabled       = true
-}
-
 resource "azurerm_service_plan" "default" {
   name                = "plan-${var.workload}"
   resource_group_name = var.group
@@ -15,7 +7,7 @@ resource "azurerm_service_plan" "default" {
 }
 
 resource "azurerm_linux_web_app" "default" {
-  name                = "app-${var.workload}999"
+  name                = "app-${var.workload}"
   resource_group_name = var.group
   location            = var.location
   service_plan_id     = azurerm_service_plan.default.id
@@ -29,9 +21,9 @@ resource "azurerm_linux_web_app" "default" {
 
     application_stack {
       docker_image_name        = "javaapp:latest"
-      docker_registry_url      = "https://${azurerm_container_registry.acr.login_server}"
-      docker_registry_username = azurerm_container_registry.acr.admin_username
-      docker_registry_password = azurerm_container_registry.acr.admin_password
+      docker_registry_url      = "https://${var.acr_login_server}"
+      docker_registry_username = var.acr_admin_username
+      docker_registry_password = var.acr_admin_password
     }
   }
 
